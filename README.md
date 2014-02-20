@@ -1,7 +1,7 @@
 Assets
 ======
 
-This command line tool walks a directory and compiles a JSON dictionary of all assets/files in the directory.
+This command line tool walks a directory and generates a JSON dictionary of all assets/files in the directory.
 
 
 Installation
@@ -19,16 +19,16 @@ Type this:
 
 That will print to the screen a JSON dictionary of all assets found in the current directory (including assets in any subfolders). The JSON structure should look something like this:
 
-  [
-    {
-      "key": "file1",
-      "directory": "/home/users/sally/",
-      "filename": "file1.txt",
-      "extension": "txt",
-      "locale": "en-us"
-    },
-    ...
-  ]
+    [
+      {
+        "key": "file1",
+        "directory": "/home/users/sally/",
+        "filename": "file1.txt",
+        "extension": "txt",
+        "locale": "en-us"
+      },
+      ...
+    ]
 
 You can specify any directory you like. For instance:
 
