@@ -27,6 +27,7 @@
 #define MAX_EXTENSION_LENGTH 32
 #define MAX_FILENAME_LENGTH 100
 #define MAX_ENTRY_LENGTH 2000
+#define MAX_COMMAND_LENGTH 1024
 
 
 /*  ------------------------------------------------------------
@@ -39,7 +40,8 @@
 
 void base_path(char *variable, char *full_path);
 void filename_without_extension(char *variable, char *filename);
-void extension(char *variable, char*filename);
+void extension(char *variable, char *filename);
+void md5(char *variable, char *path);
 void process_file(char *path, struct stat *info);
 void walk(char *path, char *blacklist[], int length_of_blacklist);
 

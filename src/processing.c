@@ -22,16 +22,16 @@
  *  ------------------------------------------------------------
  */
 
-// The standard C library.                                                    
+// The standard C library.
 #include <stdio.h>
 
-// For things like `exit(0)`.                                                 
+// For things like `exit(0)`.
 #include <stdlib.h>
 
 // For using the `stat()` function.
 #include <sys/stat.h>
 
-// For working with strings, e.g., `strcat()`.                                
+// For working with strings, e.g., `strcat()`.
 #include <string.h>
 
 // For working with directory entities (on POSIX systems).
@@ -144,6 +144,37 @@ void extension(char *variable, char *filename) {
 }
 
 /*
+ *  Get the md5 hash of a file.
+ *
+ *  @param char *variable The variable to store the hash in.
+ *  @param char *path The path to the file.
+ */
+void md5(char *variable, char *path) {
+
+  // Make sure md5sum is installed on the system.
+  int status_code = system("which md5sum >/dev/null 2>&1");
+  if (status_code == 0) {
+
+    // Build a command to get the md5 sum for the file.
+    char command[MAX_COMMAND_LENGTH];
+    initialize_string(command);
+    add_to_string(command, "md5sum ");
+    add_to_string(command, path);
+
+    // Open a stream that runs the command.
+    FILE *stream = popen(command, "r");
+
+    // Get the first 32 characters.
+    fgets(variable, 32, stream);
+
+    // Close the stream.
+    pclose(stream);
+
+  }
+
+}
+
+/*
  *  Process a file and gather information about it.
  *
  *  @param char *path The path to the file.
@@ -166,6 +197,11 @@ void process_file(char *path, struct stat *info) {
   // Get the base path for this file.
   char file_path[MAX_PATH_LENGTH];
   base_path(file_path, path);
+
+  // Get the md5 of this file.
+  char hash[32];
+  initialize_string(hash);
+  md5(hash, path);
 
   // Start building the entry for this file.
   char entry[MAX_ENTRY_LENGTH];
@@ -193,7 +229,12 @@ void process_file(char *path, struct stat *info) {
   add_to_string(entry, "\",");
 
   // Add the local.
-  add_to_string(entry, "\"locale\": \"en-us\"");
+  add_to_string(entry, "\"locale\": \"en-us\",");
+
+  // Add the md5.
+  add_to_string(entry, "\"md5\": \"");
+  add_to_string(entry, hash);
+  add_to_string(entry, "\"");
 
   // Finish building the entry.
   add_to_string(entry, "}");
