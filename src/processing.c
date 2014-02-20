@@ -190,7 +190,7 @@ void process_file(char *path, struct stat *info) {
   // Add the extension.
   add_to_string(entry, "\"extension\": \"");
   add_to_string(entry, file_extension);
-  add_to_string(entry, "\"");
+  add_to_string(entry, "\",");
 
   // Add the local.
   add_to_string(entry, "\"locale\": \"en-us\"");
