@@ -21,13 +21,13 @@
  *  ------------------------------------------------------------
  */
 
-// The standard C library.                                                    
+// The standard C library.
 #include <stdio.h>
 
-// For things like `exit(0)`.                                                 
+// For things like `exit(0)`.
 #include <stdlib.h>
 
-// For working with strings, e.g., `strcat()`.                                
+// For working with strings, e.g., `strcat()`.
 #include <string.h>
 
 // We need the header that declares the prototypes for this file.
@@ -91,6 +91,12 @@ void set_log_file(char *path) {
  */
 void start_logging() {
 
+  // If we're writing to a file,
+  // delete the file first (it will be recreated).
+  if (logging_type == 1) {
+    remove(log_file_path);
+  }
+
   // Start with no delimiter.
   delimiter[0] = '\0';
 
@@ -142,7 +148,6 @@ void print_to_stdout(char *message) {
   if (use_delimiter) {
     printf("%s%s", delimiter, message);
     if (delimiter[0] == '\0') {
-      delimiter[0] = '\0';
       delimiter[0] = ',';
     }
   } else {
@@ -168,7 +173,14 @@ void print_to_file(char *message, char *path) {
   if (file != NULL) {
 
     // Write the message.
-    fprintf(file, "%s\n", message);
+    if (use_delimiter) {
+      fprintf(file, "%s%s", delimiter, message);
+      if (delimiter[0] == '\0') {
+        delimiter[0] = ',';
+      }
+    } else {
+      fprintf(file, "%s", message);
+    }
 
     // Close the stream.
     fclose(file);
