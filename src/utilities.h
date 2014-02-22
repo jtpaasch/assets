@@ -38,13 +38,14 @@ void initialize_string(char *name);
 void add_to_string(char *string, char *addition);
 void set_real_path(char *variable, char *stipulated_path);
 void build_path(char *variable, char *base_path, char *filename);
-int string_is_in_list(char *list[], int size, char *item_to_look_for);
+int string_is_in_list(char *haystack, char *needle);
 int is_on_filesystem(char *path);
 int is_dir(struct stat *info);
 int is_file(struct stat *info);
 void first_char_pos(int *index, char *haystack, int needle);
 void last_char_pos(int *index, char *haystack, int needle);
 void substr(char *substring, char *haystack, int index);
-
+int delimiter_count(char *haystack, char *delimiter);
+void explode(char *variable[], char *haystack, char *delimiter);
 
 #endif

@@ -107,20 +107,32 @@ void build_path(char *variable, char *base_path, char *filename) {
 }
 
 /*
- *  Is the stipulated string in the given list?
+ *  Find if a string is in a comma separated list of strings.
  *
- *  @param char *list[] The list to search in.
- *  @param int size The number of elements in the list.
- *  @param char *item_to_look_for The string to look for.
+ *  @param char *haystack The comma separated list to look in.
+ *  @param char *needle The string to look for.
+ *  @return int 1 if it was found, 0 if not.
  */
-int string_is_in_list(char *list[], int size, char *item_to_look_for) {
-  int i;
-  for (i = 0; i < size; i++) {
-    if (strcmp(list[i], item_to_look_for) == 0) {
-      return 1; // Found it.
+int string_is_in_list(char *haystack, char *needle) {
+
+  // strtok is destructive, so we need to work on a copy of the haystack.
+  char haystack_copy[strlen(haystack)];
+  strcpy(haystack_copy, haystack);
+
+  // Walk through the haystack, looking for the needle.
+  char *token;
+  char delimiter[] = ",";
+  token = strtok(haystack_copy, delimiter);
+  while (token != NULL) {
+    if (strcmp(token, needle) == 0) {
+      return 1;
     }
+    token = strtok(NULL, delimiter);
   }
-  return 0; // Did not found it.
+
+  // No match was found if we got to here.
+  return 0;
+
 }
 
 /*
@@ -212,3 +224,42 @@ void substr(char *substring, char *haystack, int index) {
   substring[index] = '\0';
 }
 
+/*
+ *  Find how many times a delimiter character occurs in a string.
+ *
+ *  @param char *haystack The string to search in.
+ *  @param char *delimiter The character to count how many times it occurs.
+ *  @return int The number of occurrences.
+ */
+int delimiter_count(char *haystack, char *delimiter) {
+  char *token_position;
+  int number_of_tokens = 0;
+  token_position = strpbrk(haystack, delimiter);
+  while (token_position != NULL) {
+    number_of_tokens++;
+    token_position = strpbrk(token_position + 1, delimiter);
+  }
+  if (number_of_tokens > 0) {
+    return number_of_tokens + 1;
+  } else {
+    return 0;
+  }
+}
+
+/*
+ *  Break a string up into substrings.
+ *
+ *  @param char *variable[] The array to store the substrings in.
+ *  @param char *haystack The string to break up.
+ *  @param char *delimiter The character to split the string by.
+ *  @return void
+ */
+void explode(char *variable[], char *haystack, char *delimiter) {
+  char *token_position;
+  int i = 0;
+  token_position = strtok(haystack, delimiter);
+  while (token_position != NULL) {
+    variable[i++] = token_position;
+    token_position = strtok(NULL, delimiter);
+  }
+}

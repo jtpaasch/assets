@@ -43,7 +43,7 @@ void filename_without_extension(char *variable, char *filename);
 void extension(char *variable, char *filename);
 void md5(char *variable, char *path);
 void process_file(char *path, struct stat *info);
-void walk(char *path, char *blacklist[], int length_of_blacklist);
+void walk(char *path, char *blacklist);
 
 
 #endif

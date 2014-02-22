@@ -228,9 +228,6 @@ void process_file(char *path, struct stat *info) {
   add_to_string(entry, file_extension);
   add_to_string(entry, "\",");
 
-  // Add the local.
-  add_to_string(entry, "\"locale\": \"en-us\",");
-
   // Add the md5.
   add_to_string(entry, "\"md5\": \"");
   add_to_string(entry, hash);
@@ -248,11 +245,10 @@ void process_file(char *path, struct stat *info) {
  *  Walk a directory tree.
  *
  *  @char *path The folder to walk.
- *  @char *blacklist[] A list of files to ignore.
- *  @int length_of_blacklist The number of items on the blacklist.
+ *  @char *blacklist A comma separated list of files to ignore.
  *  @return void
  */
-void walk(char *path, char *blacklist[], int length_of_blacklist) {
+void walk(char *path, char *blacklist) {
 
   // When we open a stream to the path, we'll store it here:
   DIR *stream;
@@ -275,7 +271,7 @@ void walk(char *path, char *blacklist[], int length_of_blacklist) {
     while ((item = readdir(stream))) {
 
       // If the item is not in the blacklist, we can proceed.
-      if (!string_is_in_list(blacklist, length_of_blacklist, item->d_name)) {
+      if (!string_is_in_list(blacklist, item->d_name)) {
 
         // Construct the path to this file/folder item.
         char full_path[MAX_PATH_LENGTH];
@@ -295,7 +291,7 @@ void walk(char *path, char *blacklist[], int length_of_blacklist) {
 
           // Is it a directory? If so, look in it (recursively).
           if (is_dir(&info)) {
-            walk(full_path, blacklist, length_of_blacklist);
+            walk(full_path, blacklist);
           }
 
           // Is it a file? If so, process it.
@@ -303,7 +299,8 @@ void walk(char *path, char *blacklist[], int length_of_blacklist) {
             process_file(full_path, &info);
           }
 
-        } 
+        }
+
         // If we didn't get any information about the file,
         // print a message saying so.
         else {
@@ -312,7 +309,7 @@ void walk(char *path, char *blacklist[], int length_of_blacklist) {
           exit(1);
 	}
 
-      }
+      } 
 
     }
 

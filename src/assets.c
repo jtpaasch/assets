@@ -52,6 +52,16 @@
 #define MAX_PATH_LENGTH 1024
 
 
+/*  ------------------------------------------------------------
+ *
+ *  NON-CONSTANT VARIABLES THAT CAN BE SET
+ *
+ *  ------------------------------------------------------------
+ */
+int has_blacklist_additions = 0;
+char *blacklist_additions;
+char *blacklist;
+
 
 /*  ------------------------------------------------------------
  *
@@ -118,44 +128,106 @@ int main(int number_of_arguments, char *argument[]) {
   // Otherwise, we can proceed.
   else {
 
-    // The first argument is the folder to crawl.
+    // We want to find certain things in the arguments.
+    // Here are some flags that specify whether we find a blacklist, 
+    // a directory to crawl, and an output file to write to.
+    int has_blacklist = 0;
+    int has_folder_to_crawl = 0;
+    int has_output_file = 0;
+
+    // We'll store the path to the folder to crawl here:
     char folder_to_crawl[MAX_PATH_LENGTH];
-    set_real_path(folder_to_crawl, argument[1]);
 
-    // Is there a second argument?
-    if (number_of_arguments > 2) {
+    // Now we can process each argument.
+    for (int i = 1; i < number_of_arguments; i++) {
 
-      // The second argument is the output file to write to.
-      char output_file[MAX_PATH_LENGTH];
-      set_real_path(output_file, argument[2]);
+      // Is this argument the optional "--ignore"? 
+      if (strcmp(argument[i], "--ignore") == 0) {
 
-      // Set this file as our log file.
-      set_log_file(output_file);
+        // Set the flag that we've found it.
+        has_blacklist = 1;
 
-      // We need to set our logging_type to '1', 
-      // which stands for 'write to file'.
-      set_logging_type(1);
+        // The string of items to blacklist/ignore will be the next argument.
+        blacklist_additions = argument[i + 1];
+        has_blacklist_additions = 1;
+
+        // Increment the counter so the next iteration of the loop
+        // won't try to process the blacklist string.
+        i++;
+
+      } 
+
+      // Otherwise, this argument isn't an optional argument.
+      else {
+
+        // Have we found the folder to crawl yet?
+        if (!has_folder_to_crawl) {
+
+          // Calculate the real path to the folder.
+          set_real_path(folder_to_crawl, argument[i]);
+
+          // Set the flag saying we've found it.
+          has_folder_to_crawl = 1;
+
+        }
+
+        // Have we found an output file to write yet?
+        else if (!has_output_file) {
+
+          // Calculate the real path to this file.
+          char output_file[MAX_PATH_LENGTH];
+          set_real_path(output_file, argument[i]);
+
+          // Set this file as our log file.
+          set_log_file(output_file);
+
+          // We need to set our logging_type to '1', 
+          // which stands for 'write to file'.
+          set_logging_type(1);
+
+          // Set the flag saying te've found it.
+          has_output_file = 1;
+
+        }
+
+      }
 
     }
 
-    // What files should we ignore?
-    int length_of_blacklist = 2;
-    char *blacklist[length_of_blacklist];
-    blacklist[0] = ".";
-    blacklist[1] = "..";
+    // If we got no folder to crawl, we can't proceed.
+    if (!has_folder_to_crawl) {
+      print_usage();
+    }
 
-    // Start the logging.
-    start_logging();
+    // Otherwise, we can get on with it.
+    else {
 
-    // Walk the tree.
-    walk(folder_to_crawl, blacklist, length_of_blacklist);
+      // Initialize the blacklist.
+      if (has_blacklist_additions) {
+        blacklist = malloc(strlen(blacklist_additions) + 5);
+        initialize_string(blacklist);
+        add_to_string(blacklist, ".,..,");
+        add_to_string(blacklist, blacklist_additions);
+      } else {
+        blacklist = malloc(4);
+        initialize_string(blacklist);
+        add_to_string(blacklist, ".,..");
+      }
 
-    // Stop the logging.
-    stop_logging();
+      // Start the logging.
+      start_logging();
+
+      // Walk the tree.
+      walk(folder_to_crawl, blacklist);
+
+      // Stop the logging.
+      stop_logging();
+
+    }
 
   }
 
-  exit(0);
+  return 0;
 
 }
 
