@@ -52,11 +52,29 @@
 
 /*  ------------------------------------------------------------
  *
+ *  NON-CONSTANT VARIABLES
+ *
+ *  ------------------------------------------------------------
+ */
+int cachebust = 0;
+
+
+/*  ------------------------------------------------------------
+ *
  *  FUNCTION DEFINITIONS
  *  Note: function prototypes are defined in processing.h
  *
  *  ------------------------------------------------------------
  */
+
+/*
+ *  Set the cachebust flag.
+ *
+ *  @int flag 1 to turn cachebust naming on, 0 to turn it off.
+ */
+void set_cachebust(int flag) {
+  cachebust = flag;
+}
 
 /*
  *  Find the path of a directory (everything up to its filename).
@@ -174,6 +192,18 @@ void md5(char *variable, char *path) {
 
 }
 
+
+void cachebust_filename(char *var, char *key, char *hash, char *ending) {
+    initialize_string(var);
+    add_to_string(var, key);
+    add_to_string(var, ".");
+    add_to_string(var, hash);
+    if (strlen(ending) > 0) {
+      add_to_string(var, ".");
+      add_to_string(var, ending);
+    }
+}
+
 /*
  *  Process a file and gather information about it.
  *
@@ -203,6 +233,31 @@ void process_file(char *path, struct stat *info) {
   initialize_string(hash);
   md5(hash, path);
 
+  // We'll store the cachebusted filename here:
+  char cachebusted_filename[MAX_FILENAME_LENGTH];
+
+  // If we try to rename a file, it returns a status code. 
+  // 0 means success, 1 means fail, like a unix status code.
+  // I know. It's weird, but that's how C does it. With this variable,
+  // we can test `if (was_not_renamed)` to see if it wasn't renamed.
+  int was_not_renamed;
+
+  // Are we going to cache bust the filename? 
+  if (cachebust) {
+
+    // Construct the cache busted filename.
+    cachebust_filename(cachebusted_filename, key, hash, file_extension);
+
+    // Rename the file.
+    was_not_renamed = rename(filename, cachebusted_filename);
+    if (was_not_renamed) {
+      puts("Could not rename this file:");
+      printf("%s\n", filename);
+      exit(1);
+    } 
+
+  }
+
   // Start building the entry for this file.
   char entry[MAX_ENTRY_LENGTH];
   initialize_string(entry);
@@ -220,7 +275,11 @@ void process_file(char *path, struct stat *info) {
 
   // Add the filename.
   add_to_string(entry, "\"filename\": \"");
-  add_to_string(entry, filename);
+  if (cachebust) {
+    add_to_string(entry, cachebusted_filename);
+  } else {
+    add_to_string(entry, filename);
+  }
   add_to_string(entry, "\",");
 
   // Add the extension.

@@ -131,7 +131,6 @@ int main(int number_of_arguments, char *argument[]) {
     // We want to find certain things in the arguments.
     // Here are some flags that specify whether we find a blacklist, 
     // a directory to crawl, and an output file to write to.
-    int has_blacklist = 0;
     int has_folder_to_crawl = 0;
     int has_output_file = 0;
 
@@ -141,11 +140,13 @@ int main(int number_of_arguments, char *argument[]) {
     // Now we can process each argument.
     for (int i = 1; i < number_of_arguments; i++) {
 
-      // Is this argument the optional "--ignore"? 
-      if (strcmp(argument[i], "--ignore") == 0) {
+      // Is this argument the optional "--cachebust"?
+      if (strcmp(argument[i], "--cachebust") == 0) {
+        set_cachebust(1);
+      }
 
-        // Set the flag that we've found it.
-        has_blacklist = 1;
+      // Is this argument the optional "--ignore"? 
+      else if (strcmp(argument[i], "--ignore") == 0) {
 
         // The string of items to blacklist/ignore will be the next argument.
         blacklist_additions = argument[i + 1];
