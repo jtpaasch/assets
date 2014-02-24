@@ -333,13 +333,18 @@ void process_file(char *path, struct stat *info) {
     // Construct the cache busted filename.
     cachebust_filename(cachebusted_filename, key, hash, file_extension);
 
+    // Construct a full path to the new cache-busted filename
+    char new_path[MAX_PATH_LENGTH];
+    initialize_string(new_path);
+    add_to_string(new_path, file_path);
+    add_to_string(new_path, cachebusted_filename);
+
     // Rename the file.
     int rename_success;
-    rename_success = rename(filename, cachebusted_filename);
+    rename_success = rename(path, new_path);
     if (rename_success != 0) {
       puts("Could not rename this file:");
       printf("%s\n", filename);
-      printf("Error code: %d\n", rename_success);
       exit(1);
     } 
 
