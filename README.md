@@ -62,7 +62,7 @@ If you want the `assets` program to cachebust your filenames, use the `--cachebu
 
 That will rename all files by appending the md5 hash of the file. Files named in the form `<filename>.<extension>` become `<filename>.<md5-hash>.<extension>`.
 
-If you want to ignore files or directories, use `--ignore`, followed by a comma separated list of filenames. For insance:
+If you want to ignore files or directories, use `--ignore`, followed by a comma separated list of filenames (no spaces). For instance:
 
     $ assets . --ignore .git,.gitignore,dist
 
