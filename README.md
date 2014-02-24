@@ -66,6 +66,6 @@ If you want to ignore files or directories, use `--ignore`, followed by a comma 
 
     $ assets . --ignore .git,.gitignore,dist
 
-To include a base64 encoded string of the files' contents, use `--base64` followed by the maximum number of characters your base64 encoded strings can be.
+To include a base64 encoded string of the files' contents, use `--base64` followed by the max filesize you want to base64 encode. For instance to base64 encode all files 2k or smaller:
 
-    $ assets . --base64 12000
+    $ assets . --base64 2000
