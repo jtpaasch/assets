@@ -88,12 +88,17 @@ void print_usage() {
   puts("");
   puts("Assets 0.1");
   puts("----------");
-  puts("This program crawls a folder and makes a detailed dictionary");
+  puts("This program crawls a folder and generates a dictionary");
   puts("of all assets it finds, noting the path, type of file, etc.");
   puts("");
-  puts("Usage: assets <folder> <output-file>");
-  puts("-- <folder> is the folder to crawl for assets");
-  puts("-- <output-file> is where to save the dictionary");
+  puts("Usage: assets <folder> [<output-file>] [options]");
+  puts(" <folder>      : is the folder to crawl for assets");
+  puts(" <output-file> : is where to save the dictionary");
+  puts("");
+  puts("Options:");
+  puts("--cachebust     : renames files with cachebusting names");
+  puts("--base64 <size> : base64 encode files smaller than <size> bytes");
+  puts("--ignore file1,file2,file3 : ignore the specified files"); 
   puts("");
   puts("Example: assets . assets.json");
   puts("-- This will crawl the current directory (\".\")");
@@ -163,7 +168,7 @@ int main(int number_of_arguments, char *argument[]) {
       else if (strcmp(argument[i], "--base64") == 0) {
 
         // The max size of base64 content will be the next argument.
-	set_max_base64_size(atoi(argument[i + 1]));
+	set_max_filesize_to_base64_encode(atoi(argument[i + 1]));
 
 	// Increment the counter so the next iteration skips that argument.
 	i++;

@@ -62,6 +62,8 @@
 int max_entry_length = 1024;
 int cachebust = 0;
 int max_base64_size = 0;
+int max_filesize_to_base64_encode = 0;
+int max_chars_in_base64_strings = 0;
 
 
 /*  ------------------------------------------------------------
@@ -98,9 +100,10 @@ void set_cachebust(int flag) {
  *  @param int size The max number of characters.
  *  @return void
  */
-void set_max_base64_size(int size) {
-  max_base64_size = size;
-  set_max_entry_length(size);
+void set_max_filesize_to_base64_encode(int size) {
+  max_filesize_to_base64_encode = size;
+  max_chars_in_base64_strings = (int) ((size * 1.37) + 820);
+  set_max_entry_length(max_chars_in_base64_strings);
 }
 
 /*
@@ -228,7 +231,7 @@ void md5(char *variable, char *path) {
  *  @param char *variable The variable to store the encoded string in.
  *  @param char *path The path to the file.
  */
-void base64(char *variable, char *path) {
+void base64(char *variable, char *path, int filesize) {
 
   // Make sure base64 is installed on the system.
   int status_code = system("which base64 >/dev/null 2>&1");
@@ -246,30 +249,17 @@ void base64(char *variable, char *path) {
 
       // Read the response, character by character.
       char character;
-      char output[max_base64_size];
-      initialize_string(output);
       int i = 0;
-      int encoded_fully = 1;
       while ((character = fgetc(stream)) != EOF) {
-        output[i++] = character;
-        if (i >= max_base64_size) { 
-          encoded_fully = 0;
-          break;
-        }
+        variable[i++] = character;
       }
 
       // Walk the string backwards and remove any spaces.
       i = i - 1;
-      while (isspace(output[i])) {
-        output[i] = '\0';
+      while (isspace(variable[i])) {
+        variable[i] = '\0';
         i--;
       }
-
-      // Did we encode the full thing?
-      if (encoded_fully) {
-        initialize_string(variable);
-        add_to_string(variable, output);
-      } 
 
       // Close the stream.
       pclose(stream);
@@ -329,9 +319,9 @@ void process_file(char *path, struct stat *info) {
   md5(hash, path);
 
   // Get the base64 encoded contents of this file.
-  char base64_content[max_base64_size];
-  if (max_base64_size > 0) {
-    base64(base64_content, path);
+  char base64_content[max_chars_in_base64_strings];
+  if (info->st_size <= max_filesize_to_base64_encode) {
+    base64(base64_content, path, info->st_size);
   }
 
   // We'll store the cachebusted filename here:
@@ -388,7 +378,7 @@ void process_file(char *path, struct stat *info) {
   add_to_string(entry, "\",");
 
   // Add the base64 content.
-  if (max_base64_size > 0) {
+  if (info->st_size <= max_filesize_to_base64_encode) {
     add_to_string(entry, "\"base64\":\"");
     add_to_string(entry, base64_content);
     add_to_string(entry, "\",");
