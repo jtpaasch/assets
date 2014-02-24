@@ -327,11 +327,6 @@ void process_file(char *path, struct stat *info) {
   // We'll store the cachebusted filename here:
   char cachebusted_filename[MAX_FILENAME_LENGTH];
 
-  // If we try to rename a file, it returns a status code. 
-  // 0 means success, 1 means fail, like a unix status code.
-  // We can test `if (was_not_renamed)` to see if it wasn't renamed.
-  int was_not_renamed;
-
   // Are we going to cache bust the filename? 
   if (cachebust) {
 
@@ -339,10 +334,12 @@ void process_file(char *path, struct stat *info) {
     cachebust_filename(cachebusted_filename, key, hash, file_extension);
 
     // Rename the file.
-    was_not_renamed = rename(filename, cachebusted_filename);
-    if (was_not_renamed) {
+    int rename_success;
+    rename_success = rename(filename, cachebusted_filename);
+    if (rename_success != 0) {
       puts("Could not rename this file:");
       printf("%s\n", filename);
+      printf("Error code: %d\n", rename_success);
       exit(1);
     } 
 
