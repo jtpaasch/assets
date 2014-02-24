@@ -138,7 +138,8 @@ int main(int number_of_arguments, char *argument[]) {
     char folder_to_crawl[MAX_PATH_LENGTH];
 
     // Now we can process each argument.
-    for (int i = 1; i < number_of_arguments; i++) {
+    int i;
+    for (i = 1; i < number_of_arguments; i++) {
 
       // Is this argument the optional "--cachebust"?
       if (strcmp(argument[i], "--cachebust") == 0) {
