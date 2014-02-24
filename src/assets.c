@@ -158,6 +158,17 @@ int main(int number_of_arguments, char *argument[]) {
 
       } 
 
+      // Is this argument the optional "--base64"?
+      else if (strcmp(argument[i], "--base64") == 0) {
+
+        // The max size of base64 content will be the next argument.
+	set_max_base64_size(atoi(argument[i + 1]));
+
+	// Increment the counter so the next iteration skips that argument.
+	i++;
+
+      }
+
       // Otherwise, this argument isn't an optional argument.
       else {
 

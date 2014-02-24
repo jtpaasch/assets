@@ -40,6 +40,9 @@
 // For functions like `basename()`.
 #include <libgen.h>
 
+// For checking character types, e.g., `isspace()`.
+#include <ctype.h>
+
 // We want to use our utilities.
 #include "utilities.h"
 
@@ -56,7 +59,9 @@
  *
  *  ------------------------------------------------------------
  */
+int max_entry_length = 1024;
 int cachebust = 0;
+int max_base64_size = 0;
 
 
 /*  ------------------------------------------------------------
@@ -68,12 +73,34 @@ int cachebust = 0;
  */
 
 /*
+ *  Set the max size of each entry.
+ *
+ *  @param int size The size.
+ *  @return void
+ */
+void set_max_entry_length(int size) {
+  max_entry_length += size;
+}
+
+/*
  *  Set the cachebust flag.
  *
- *  @int flag 1 to turn cachebust naming on, 0 to turn it off.
+ *  @param int flag 1 to turn cachebust naming on, 0 to turn it off.
+ *  @return void
  */
 void set_cachebust(int flag) {
   cachebust = flag;
+}
+
+/*
+ *  Set the max size of base64 content.
+ *
+ *  @param int size The max number of characters.
+ *  @return void
+ */
+void set_max_base64_size(int size) {
+  max_base64_size = size;
+  set_max_entry_length(size);
 }
 
 /*
@@ -181,18 +208,87 @@ void md5(char *variable, char *path) {
 
     // Open a stream that runs the command.
     FILE *stream = popen(command, "r");
+    if (stream != NULL) {
 
-    // Get the first 32 characters.
-    fgets(variable, 32, stream);
+      // Get the first 32 characters.
+      fgets(variable, 32, stream);
 
-    // Close the stream.
-    pclose(stream);
+      // Close the stream.
+      pclose(stream);
+
+    }
 
   }
 
 }
 
+/*
+ *  Get the base64 encoded string of a file's contents.
+ *
+ *  @param char *variable The variable to store the encoded string in.
+ *  @param char *path The path to the file.
+ */
+void base64(char *variable, char *path) {
 
+  // Make sure base64 is installed on the system.
+  int status_code = system("which base64 >/dev/null 2>&1");
+  if (status_code == 0) {
+
+    // Build a command to get the base64 string of the file's contents.
+    char command[MAX_COMMAND_LENGTH];
+    initialize_string(command);
+    add_to_string(command, "base64 ");
+    add_to_string(command, path);
+
+    // Open a stream that runs the command.
+    FILE *stream = popen(command, "r");
+    if (stream != NULL) {
+
+      // Read the response, character by character.
+      char character;
+      char output[max_base64_size];
+      initialize_string(output);
+      int i = 0;
+      int encoded_fully = 1;
+      while ((character = fgetc(stream)) != EOF) {
+        output[i++] = character;
+        if (i >= max_base64_size) { 
+          encoded_fully = 0;
+          break;
+        }
+      }
+
+      // Walk the string backwards and remove any spaces.
+      i = i - 1;
+      while (isspace(output[i])) {
+        output[i] = '\0';
+        i--;
+      }
+
+      // Did we encode the full thing?
+      if (encoded_fully) {
+        initialize_string(variable);
+        add_to_string(variable, output);
+      } 
+
+      // Close the stream.
+      pclose(stream);
+
+    }
+
+  }
+
+}
+
+/*
+ *  Create a cachebusted filename of the form: 
+ *  key.hash.ending
+ *
+ *  @param char *var The variable to store the cachebusted filename in.
+ *  @param char *key The key/name of the file.
+ *  @param char *hash The hash to add to the filename. 
+ *  @param char *ending The extension to add to the ending.
+ */
 void cachebust_filename(char *var, char *key, char *hash, char *ending) {
     initialize_string(var);
     add_to_string(var, key);
@@ -230,16 +326,20 @@ void process_file(char *path, struct stat *info) {
 
   // Get the md5 of this file.
   char hash[32];
-  initialize_string(hash);
   md5(hash, path);
+
+  // Get the base64 encoded contents of this file.
+  char base64_content[max_base64_size];
+  if (max_base64_size > 0) {
+    base64(base64_content, path);
+  }
 
   // We'll store the cachebusted filename here:
   char cachebusted_filename[MAX_FILENAME_LENGTH];
 
   // If we try to rename a file, it returns a status code. 
   // 0 means success, 1 means fail, like a unix status code.
-  // I know. It's weird, but that's how C does it. With this variable,
-  // we can test `if (was_not_renamed)` to see if it wasn't renamed.
+  // We can test `if (was_not_renamed)` to see if it wasn't renamed.
   int was_not_renamed;
 
   // Are we going to cache bust the filename? 
@@ -259,22 +359,22 @@ void process_file(char *path, struct stat *info) {
   }
 
   // Start building the entry for this file.
-  char entry[MAX_ENTRY_LENGTH];
+  char entry[max_entry_length];
   initialize_string(entry);
   add_to_string(entry, "{");
 
   // Add the key.
-  add_to_string(entry, "\"key\": \"");
+  add_to_string(entry, "\"key\":\"");
   add_to_string(entry, key);
   add_to_string(entry, "\",");
 
   // Add the directory.
-  add_to_string(entry, "\"directory\": \"");
+  add_to_string(entry, "\"directory\":\"");
   add_to_string(entry, file_path);
   add_to_string(entry, "\",");
 
   // Add the filename.
-  add_to_string(entry, "\"filename\": \"");
+  add_to_string(entry, "\"filename\":\"");
   if (cachebust) {
     add_to_string(entry, cachebusted_filename);
   } else {
@@ -283,12 +383,19 @@ void process_file(char *path, struct stat *info) {
   add_to_string(entry, "\",");
 
   // Add the extension.
-  add_to_string(entry, "\"extension\": \"");
+  add_to_string(entry, "\"extension\":\"");
   add_to_string(entry, file_extension);
   add_to_string(entry, "\",");
 
+  // Add the base64 content.
+  if (max_base64_size > 0) {
+    add_to_string(entry, "\"base64\":\"");
+    add_to_string(entry, base64_content);
+    add_to_string(entry, "\",");
+  }
+
   // Add the md5.
-  add_to_string(entry, "\"md5\": \"");
+  add_to_string(entry, "\"md5\":\"");
   add_to_string(entry, hash);
   add_to_string(entry, "\"");
 

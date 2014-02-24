@@ -124,7 +124,7 @@ int string_is_in_list(char *haystack, char *needle) {
   char delimiter[] = ",";
   token = strtok(haystack_copy, delimiter);
   while (token != NULL) {
-    if (strcmp(token, needle) == 0) {
+    if (strncmp(token, needle, strlen(needle)) == 0) {
       return 1;
     }
     token = strtok(NULL, delimiter);
