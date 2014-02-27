@@ -240,7 +240,7 @@ void base64(char *variable, char *path, int filesize) {
     // Build a command to get the base64 string of the file's contents.
     char command[MAX_COMMAND_LENGTH];
     initialize_string(command);
-    add_to_string(command, "base64 ");
+    add_to_string(command, "base64 --wrap=0 ");
     add_to_string(command, path);
 
     // Open a stream that runs the command.
