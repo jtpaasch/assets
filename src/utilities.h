@@ -41,6 +41,7 @@ void build_path(char *variable, char *base_path, char *filename);
 int string_is_in_list(char *haystack, char *needle);
 int is_on_filesystem(char *path);
 int is_dir(struct stat *info);
+int is_image(char *extension);
 int is_file(struct stat *info);
 void first_char_pos(int *index, char *haystack, int needle);
 void last_char_pos(int *index, char *haystack, int needle);

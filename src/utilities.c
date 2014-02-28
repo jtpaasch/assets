@@ -173,6 +173,31 @@ int is_dir(struct stat *info) {
 }
 
 /*
+ *  Is the item an image file type?described by `info` a directory?
+ *
+ *  @param *extension file extension.
+ *  @return int 1 If true, 0 if false.
+ */
+int is_image(char *extension) {
+  if(strcmp(extension, "gif") == 0) {
+    return 1;
+  }
+  if(strcmp(extension, "jpg") == 0) {
+    return 1;
+  }
+  if(strcmp(extension, "jpeg") == 0) {
+    return 1;
+  }
+  if(strcmp(extension, "png") == 0) {
+    return 1;
+  }
+  if(strcmp(extension, "svg") == 0) {
+    return 1;
+  }
+  return 0;
+}
+
+/*
  *  Is the item described by `info` a file?
  *
  *  @param struct stat *info The info returned by `stat()`.

@@ -254,13 +254,6 @@ void base64(char *variable, char *path, int filesize) {
         variable[i++] = character;
       }
 
-      // Walk the string backwards and remove any spaces.
-      i = i - 1;
-      while (isspace(variable[i])) {
-        variable[i] = '\0';
-        i--;
-      }
-
       // Close the stream.
       pclose(stream);
 
@@ -318,10 +311,14 @@ void process_file(char *path, struct stat *info) {
   char hash[32];
   md5(hash, path);
 
-  // Get the base64 encoded contents of this file.
+  // Get the base64 encoded contents of this file,
+  // only when file type is gif,jpg,jpeg,png,svg
   char base64_content[max_chars_in_base64_strings];
-  if (info->st_size <= max_filesize_to_base64_encode) {
-    base64(base64_content, path, info->st_size);
+  if (is_image(file_extension) == 1) {
+    initialize_string(base64_content);
+    if (info->st_size <= max_filesize_to_base64_encode) {
+      base64(base64_content, path, info->st_size);
+    }
   }
 
   // We'll store the cachebusted filename here:
@@ -346,7 +343,7 @@ void process_file(char *path, struct stat *info) {
       puts("Could not rename this file:");
       printf("%s\n", filename);
       exit(1);
-    } 
+    }
 
   }
 
@@ -379,11 +376,14 @@ void process_file(char *path, struct stat *info) {
   add_to_string(entry, file_extension);
   add_to_string(entry, "\",");
 
-  // Add the base64 content.
-  if (info->st_size <= max_filesize_to_base64_encode) {
-    add_to_string(entry, "\"base64\":\"");
-    add_to_string(entry, base64_content);
-    add_to_string(entry, "\",");
+  // Add the base64 content,
+  // only when file type is gif,jpg,jpeg,png,svg
+  if (is_image(file_extension) == 1) {
+    if (info->st_size <= max_filesize_to_base64_encode) {
+      add_to_string(entry, "\"base64\":\"");
+      add_to_string(entry, base64_content);
+      add_to_string(entry, "\",");
+    }
   }
 
   // Add the md5.
