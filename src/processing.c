@@ -231,7 +231,7 @@ void md5(char *variable, char *path) {
  *  @param char *variable The variable to store the encoded string in.
  *  @param char *path The path to the file.
  */
-void base64(char *variable, char *path, int filesize) {
+void base64(char *variable, char *path) {
 
   // Make sure base64 is installed on the system.
   int status_code = system("which base64 >/dev/null 2>&1");
@@ -253,6 +253,10 @@ void base64(char *variable, char *path, int filesize) {
       while ((character = fgetc(stream)) != EOF) {
         variable[i++] = character;
       }
+
+      // Hard-terminate the string at the next character, because there
+      // might be all sorts of scary shit in the stream buffer
+      variable[i++] = '\0';
 
       // Close the stream.
       pclose(stream);
@@ -317,7 +321,7 @@ void process_file(char *path, struct stat *info) {
   if (is_image(file_extension) == 1) {
     initialize_string(base64_content);
     if (info->st_size <= max_filesize_to_base64_encode) {
-      base64(base64_content, path, info->st_size);
+      base64(base64_content, path);
     }
   }
 
@@ -465,9 +469,9 @@ void walk(char *path, char *blacklist) {
           puts("Could not get any information on this file:");
           printf("%s\n", full_path);
           exit(1);
-	}
+        }
 
-      } 
+      }
 
     }
 

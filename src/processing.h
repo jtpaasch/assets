@@ -44,7 +44,7 @@ void base_path(char *variable, char *full_path);
 void filename_without_extension(char *variable, char *filename);
 void extension(char *variable, char *filename);
 void md5(char *variable, char *path);
-void base64(char *variable, char *path, int filesize);
+void base64(char *variable, char *path);
 void cachebust_filename(char *var, char *key, char *hash, char *ending);
 void process_file(char *path, struct stat *info);
 void walk(char *path, char *blacklist);
