@@ -119,7 +119,7 @@ int string_is_in_list(char *haystack, char *needle) {
   char haystack_copy[strlen(haystack)];
   strcpy(haystack_copy, haystack);
 
-  // Walk through the haystack, looking for the needle.
+  // Walk through the haystack copy, looking for the needle.
   char *token;
   char delimiter[] = ",";
   token = strtok(haystack_copy, delimiter);
