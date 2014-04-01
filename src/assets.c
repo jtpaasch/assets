@@ -5,7 +5,7 @@
  *    This program crawls a directory tree and
  *    makes a record of all assets it finds.
  *
- *    This file is the header for utilities.c
+ *    This file is the main file.
  *
  *    Author JT Paasch
  *    Copyright 2014 JT Paasch
