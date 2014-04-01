@@ -134,8 +134,8 @@ int main(int number_of_arguments, char *argument[]) {
   else {
 
     // We want to find certain things in the arguments.
-    // Here are some flags that specify whether we find a blacklist, 
-    // a directory to crawl, and an output file to write to.
+    // Here are some flags that specify whether we find 
+    // a directory to crawl, or an output file to write to.
     int has_folder_to_crawl = 0;
     int has_output_file = 0;
 
