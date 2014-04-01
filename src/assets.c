@@ -203,7 +203,7 @@ int main(int number_of_arguments, char *argument[]) {
           // which stands for 'write to file'.
           set_logging_type(1);
 
-          // Set the flag saying te've found it.
+          // Set the flag saying we've found it.
           has_output_file = 1;
 
         }
