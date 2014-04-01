@@ -218,7 +218,7 @@ int is_file(struct stat *info) {
 void first_char_pos(int *index, char *haystack, int needle) {
   char *match;
   match = strchr(haystack, needle);
-  *index= (int) (match -haystack);
+  *index = (int) (match - haystack);
 }
 
 /*
