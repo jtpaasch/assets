@@ -173,7 +173,7 @@ int is_dir(struct stat *info) {
 }
 
 /*
- *  Is the item an image file type?described by `info` a directory?
+ *  Is the item described by `info` an image?
  *
  *  @param *extension file extension.
  *  @return int 1 If true, 0 if false.
