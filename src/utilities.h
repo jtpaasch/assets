@@ -8,7 +8,7 @@
  *    This file is the header for utilities.c 
  *
  *    Author JT Paasch
- *    Copyright 2014 JT Paasch
+ *    Copyright 2014 Nara Logics
  *    License MIT (included with this source code)
  *
  **************************************************************/
@@ -35,18 +35,18 @@
  */
 
 void initialize_string(char *name);
-void add_to_string(char *string, char *addition);
-void set_real_path(char *variable, char *stipulated_path);
-void build_path(char *variable, char *base_path, char *filename);
-int string_is_in_list(char *haystack, char *needle);
-int is_on_filesystem(char *path);
+void add_to_string(char *string, const char *addition);
+void set_real_path(char *variable, const char *stipulated_path);
+void build_path(char *variable, const char *base_path, const char *filename);
+int string_is_in_list(const char *haystack, const char *needle);
+int is_on_filesystem(const char *path);
 int is_dir(struct stat *info);
-int is_image(char *extension);
+int is_image(const char *extension);
 int is_file(struct stat *info);
-void first_char_pos(int *index, char *haystack, int needle);
-void last_char_pos(int *index, char *haystack, int needle);
-void substr(char *substring, char *haystack, int index);
-int delimiter_count(char *haystack, char *delimiter);
-void explode(char *variable[], char *haystack, char *delimiter);
+void first_char_pos(int *index, const char *haystack, int needle);
+void last_char_pos(int *index, const char *haystack, int needle);
+void substr(char *substring, const char *haystack, int index);
+int delimiter_count(const char *haystack, const char *delimiter);
+void explode(char *variable[], char *haystack, const char *delimiter);
 
 #endif

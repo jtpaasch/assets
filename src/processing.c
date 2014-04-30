@@ -9,7 +9,7 @@
  *    for processing information about files.
  *
  *    Author JT Paasch
- *    Copyright 2014 JT Paasch
+ *    Copyright 2014 Nara Logics
  *    License MIT (included with this source code)
  *
  **************************************************************/
@@ -102,6 +102,11 @@ void set_cachebust(int flag) {
  */
 void set_max_filesize_to_base64_encode(int size) {
   max_filesize_to_base64_encode = size;
+  // 1.37 is the factor by-which we multiple the file size
+  // to (roughly) determine what the base64 encoded size will be
+  // 820 is the additional header bytes of data that base64 encoding adds
+  // to encode binary data
+  // see: http://en.wikipedia.org/wiki/Base64#MIME
   max_chars_in_base64_strings = (int) ((size * 1.37) + 820);
   set_max_entry_length(max_chars_in_base64_strings);
 }
@@ -113,7 +118,7 @@ void set_max_filesize_to_base64_encode(int size) {
  *  @param char *full_path The full path.
  *  @return void
  */
-void base_path(char *variable, char *full_path) {
+void base_path(char *variable, const char *full_path) {
 
   // We'll need to find the index of the last "/".
   int index;
@@ -142,7 +147,7 @@ void base_path(char *variable, char *full_path) {
  *  @param char *filename The filename to examine.
  *  @return void
  */
-void filename_without_extension(char *variable, char *filename) {
+void filename_without_extension(char *variable, const char *filename) {
 
   // We'll need to find the index of the last dot.
   int index;
@@ -171,7 +176,7 @@ void filename_without_extension(char *variable, char *filename) {
  *  @param char *filename The filename to extract the extension from.
  *  @return void
  */
-void extension(char *variable, char *filename) {
+void extension(char *variable, const char *filename) {
 
   // Make sure the variable is initialized (reset to nothing).
   initialize_string(variable);
@@ -197,14 +202,17 @@ void extension(char *variable, char *filename) {
  *  @param char *variable The variable to store the hash in.
  *  @param char *path The path to the file.
  */
-void md5(char *variable, char *path) {
+void md5(char *variable, const char *path) {
 
   // Make sure md5sum is installed on the system.
   int status_code = system("which md5sum >/dev/null 2>&1");
   if (status_code == 0) {
 
     // Build a command to get the md5 sum for the file.
-    char command[MAX_COMMAND_LENGTH];
+
+    // Command length is the command, plus space plus path
+    // plus null terminator
+    char command[MAX_COMMAND_LENGTH + MAX_PATH_LENGTH + 2];
     initialize_string(command);
     add_to_string(command, "md5sum ");
     add_to_string(command, path);
@@ -231,14 +239,16 @@ void md5(char *variable, char *path) {
  *  @param char *variable The variable to store the encoded string in.
  *  @param char *path The path to the file.
  */
-void base64(char *variable, char *path) {
+void base64(char *variable, const char *path) {
 
   // Make sure base64 is installed on the system.
   int status_code = system("which base64 >/dev/null 2>&1");
   if (status_code == 0) {
 
     // Build a command to get the base64 string of the file's contents.
-    char command[MAX_COMMAND_LENGTH];
+    // Command length is the command, plus space plus path
+    // plus null terminator
+    char command[MAX_COMMAND_LENGTH + MAX_PATH_LENGTH + 2];
     initialize_string(command);
     add_to_string(command, "base64 --wrap=0 ");
     add_to_string(command, path);
@@ -276,7 +286,7 @@ void base64(char *variable, char *path) {
  *  @param char *hash The hash to add to the filename. 
  *  @param char *ending The extension to add to the ending.
  */
-void cachebust_filename(char *var, char *key, char *hash, char *ending) {
+void cachebust_filename(char *var, const char *key, const char *hash, const char *ending) {
     initialize_string(var);
     add_to_string(var, key);
     add_to_string(var, ".");
@@ -410,7 +420,7 @@ void process_file(char *path, struct stat *info) {
  *  @char *blacklist A comma separated list of files to ignore.
  *  @return void
  */
-void walk(char *path, char *blacklist) {
+void walk(char *path, const char *blacklist) {
 
   // When we open a stream to the path, we'll store it here:
   DIR *stream;
@@ -476,7 +486,7 @@ void walk(char *path, char *blacklist) {
     }
 
     // Close the stream to the directory.
-    (void) closedir(stream);
+    //(void) closedir(stream);
 
   }
 
@@ -484,7 +494,7 @@ void walk(char *path, char *blacklist) {
   else {
     puts("Could not open the following path:");
     printf("%s\n", path);
-    exit(1);    
+    exit(1);
   }
 
 }

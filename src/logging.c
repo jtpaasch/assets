@@ -8,7 +8,7 @@
  *    This file provides utilities for writing/logging.
  *
  *    Author JT Paasch
- *    Copyright 2014 JT Paasch
+ *    Copyright 2014 Nara Logics
  *    License MIT (included with this source code)
  *
  **************************************************************/
@@ -49,8 +49,8 @@ int logging_type = 0;
 // The path to a file to write logging to.
 char *log_file_path;
 
-// A delimiter to separate logged records. 
-char delimiter[1];
+// A delimiter to separate logged records.
+char delimiter[2];
 
 // A flag to say if we're using delimiters or not.
 int use_delimiter = 0;
@@ -89,7 +89,7 @@ void set_log_file(char *path) {
  *
  *  @return void
  */
-void start_logging() {
+void start_logging(void) {
 
   // If we're writing to a file,
   // delete the file first (it will be recreated).
@@ -97,8 +97,9 @@ void start_logging() {
     remove(log_file_path);
   }
 
-  // Start with no delimiter.
-  delimiter[0] = '\0';
+    // Start with no delimiter.
+    delimiter[0] = '\0';
+    delimiter[1] = '\0';
 
   // Open with an opening brace.
   put_to_log("[");
@@ -113,7 +114,7 @@ void start_logging() {
  *
  *  @return void
  */
-void stop_logging() {
+void stop_logging(void) {
   use_delimiter = 0;
   put_to_log("]");
 }
@@ -124,7 +125,7 @@ void stop_logging() {
  *  @param char *message The message to log.
  *  @return void
  */
-void put_to_log(char *message) {
+void put_to_log(const char *message) {
 
   // If the logging type is "0", we just print to STDOUT.
   if (logging_type == 0) {
@@ -144,13 +145,20 @@ void put_to_log(char *message) {
  *  @param char *message The message to print.
  *  @return void
  */
-void print_to_stdout(char *message) {
+void print_to_stdout(const char *message) {
   if (use_delimiter) {
     printf("%s%s", delimiter, message);
+
+    // delimiter needs to be two characters long because it's treated as a cstring (has a '\0' terminator)
+    // Using ',' as a delimiter would read an arbitrary amount of memory after delimiter[0]
+    // until \0 were encountered by chance.
     if (delimiter[0] == '\0') {
       delimiter[0] = ',';
     }
   } else {
+
+    // TODO - printf returns failure codes - check this?
+
     printf("%s", message);
   }
 }
@@ -161,7 +169,7 @@ void print_to_stdout(char *message) {
  *  @param char *message The message to write.
  *  @return void
  */
-void print_to_file(char *message, char *path) {
+void print_to_file(const char *message, const char *path) {
 
   // We'll store the stream to the file here:
   FILE *file;
@@ -171,6 +179,8 @@ void print_to_file(char *message, char *path) {
 
   // Did it work?
   if (file != NULL) {
+
+    // TODO - fprintf returns failure codes - report this?
 
     // Write the message.
     if (use_delimiter) {
@@ -184,6 +194,8 @@ void print_to_file(char *message, char *path) {
 
     // Close the stream.
     fclose(file);
+
+    // TODO - fclose returns EOF on failure - report this?
 
   }
 
