@@ -9,7 +9,7 @@
  *    for the ASSETS program.
  *
  *    Author JT Paasch
- *    Copyright 2014 JT Paasch
+ *    Copyright 2014 Nara Logics
  *    License MIT (included with this source code)
  *
  **************************************************************/
@@ -69,7 +69,13 @@ void initialize_string(char *name) {
  *  @param char *addition The string to add.
  *  @return void
  */
-void add_to_string(char *string, char *addition) {
+void add_to_string(char *string, const char *addition) {
+
+  // TODO - is there a maximum token size we can use to limit these string operations?
+
+  // TODO - I wouldn't use this function as an alias for strcat. We should be seeing the
+  // library calls so we understand what their limitations are.
+
   strcat(string, addition);
 }
 
@@ -81,7 +87,7 @@ void add_to_string(char *string, char *addition) {
  *  @param char *stipulated_path The path to resolve.
  *  @return void
  */
-void set_real_path(char *variable, char *stipulated_path) {
+void set_real_path(char *variable, const char *stipulated_path) {
 
   // Make sure the variable is initialized (reset to nothing).
   initialize_string(variable);
@@ -99,7 +105,7 @@ void set_real_path(char *variable, char *stipulated_path) {
  *  @return char *filename The filename.
  *  @return void
  */
-void build_path(char *variable, char *base_path, char *filename) {
+void build_path(char *variable, const char *base_path, const char *filename) {
   initialize_string(variable);
   add_to_string(variable, base_path);
   add_to_string(variable, "/");
@@ -113,10 +119,15 @@ void build_path(char *variable, char *base_path, char *filename) {
  *  @param char *needle The string to look for.
  *  @return int 1 if it was found, 0 if not.
  */
-int string_is_in_list(char *haystack, char *needle) {
+int string_is_in_list(const char *haystack, const char *needle) {
+
+  // TODO - is there a maximum token size we can use to
+  // limit these string operations?
+
+  // TODO - strlen doesn't count the terminating null. I've tried to fix this but please check my code.
 
   // strtok is destructive, so we need to work on a copy of the haystack.
-  char haystack_copy[strlen(haystack)];
+  char haystack_copy[strlen(haystack)+1];
   strcpy(haystack_copy, haystack);
 
   // Walk through the haystack copy, looking for the needle.
@@ -124,6 +135,9 @@ int string_is_in_list(char *haystack, char *needle) {
   char delimiter[] = ",";
   token = strtok(haystack_copy, delimiter);
   while (token != NULL) {
+
+    // TODO - strlen here doesn't improve the strncmp call's security here.
+
     if (strncmp(token, needle, strlen(needle)) == 0) {
       return 1;
     }
@@ -141,7 +155,7 @@ int string_is_in_list(char *haystack, char *needle) {
  *  @param char *path The path to check.
  *  @return int 1 if true, 0 if false.
  */
-int is_on_filesystem(char *path) {
+int is_on_filesystem(const char *path) {
 
   // We'll store information about the file/folder 
   // we find at the end of that path here:
@@ -178,20 +192,23 @@ int is_dir(struct stat *info) {
  *  @param *extension file extension.
  *  @return int 1 If true, 0 if false.
  */
-int is_image(char *extension) {
-  if(strcmp(extension, "gif") == 0) {
+
+// TODO - use strncmp. I've tried to fix this but please check my code.
+
+int is_image(const char *extension) {
+  if(strncmp(extension, "gif", 3) == 0) {
     return 1;
   }
-  if(strcmp(extension, "jpg") == 0) {
+  if(strncmp(extension, "jpg", 3) == 0) {
     return 1;
   }
-  if(strcmp(extension, "jpeg") == 0) {
+  if(strncmp(extension, "jpeg", 4) == 0) {
     return 1;
   }
-  if(strcmp(extension, "png") == 0) {
+  if(strncmp(extension, "png", 3) == 0) {
     return 1;
   }
-  if(strcmp(extension, "svg") == 0) {
+  if(strncmp(extension, "svg", 3) == 0) {
     return 1;
   }
   return 0;
@@ -215,8 +232,11 @@ int is_file(struct stat *info) {
  *  @param int needle The character to search for.
  *  @return void
  */
-void first_char_pos(int *index, char *haystack, int needle) {
+void first_char_pos(int *index, const char *haystack, int needle) {
   char *match;
+
+  // TODO - is there a maximum token size we can use to limit these string operations?
+
   match = strchr(haystack, needle);
   *index = (int) (match - haystack);
 }
@@ -229,7 +249,7 @@ void first_char_pos(int *index, char *haystack, int needle) {
  *  @param int needle The character to search for.
  *  @return void
  */
-void last_char_pos(int *index, char *haystack, int needle) {
+void last_char_pos(int *index, const char *haystack, int needle) {
   char *match;
   match = strrchr(haystack, needle);
   if (match != NULL) {
@@ -244,7 +264,7 @@ void last_char_pos(int *index, char *haystack, int needle) {
  *  @param char *haystack The string to extract the substring from.
  *  @param int index The number of characters to extract from the haystack.
  */
-void substr(char *substring, char *haystack, int index) {
+void substr(char *substring, const char *haystack, int index) {
   strncpy(substring, haystack, index);
   substring[index] = '\0';
 }
@@ -256,7 +276,7 @@ void substr(char *substring, char *haystack, int index) {
  *  @param char *delimiter The character to count how many times it occurs.
  *  @return int The number of occurrences.
  */
-int delimiter_count(char *haystack, char *delimiter) {
+int delimiter_count(const char *haystack, const char *delimiter) {
   char *token_position;
   int number_of_tokens = 0;
   token_position = strpbrk(haystack, delimiter);
@@ -279,9 +299,12 @@ int delimiter_count(char *haystack, char *delimiter) {
  *  @param char *delimiter The character to split the string by.
  *  @return void
  */
-void explode(char *variable[], char *haystack, char *delimiter) {
+void explode(char *variable[], char *haystack, const char *delimiter) {
   char *token_position;
   int i = 0;
+
+    // TODO - is there a maximum token size we can use to limit these string operations?
+
   token_position = strtok(haystack, delimiter);
   while (token_position != NULL) {
     variable[i++] = token_position;

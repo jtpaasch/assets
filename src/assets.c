@@ -8,7 +8,7 @@
  *    This file is the main file.
  *
  *    Author JT Paasch
- *    Copyright 2014 JT Paasch
+ *    Copyright 2014 Nara Logics
  *    License MIT (included with this source code)
  *
  **************************************************************/
@@ -42,6 +42,9 @@
 // Our tools for logging/writing output are defined in logging.h.
 #include "logging.h"
 
+// Prototypes for this file's functions.
+#include "assets.h"
+
 
 /*  ------------------------------------------------------------
  *
@@ -65,15 +68,6 @@ char *blacklist;
 
 /*  ------------------------------------------------------------
  *
- *  FUNCTION PROTOTYPES
- * 
- *  ------------------------------------------------------------
- */
-void print_usage();
-
-
-/*  ------------------------------------------------------------
- *
  *  FUNCTION DEFINITIONS
  * 
  *  ------------------------------------------------------------
@@ -84,7 +78,7 @@ void print_usage();
  *
  *  @return void
  */
-void print_usage() {
+void print_usage(void) {
   puts("");
   puts("Assets 0.1");
   puts("----------");
@@ -128,7 +122,7 @@ int main(int number_of_arguments, char *argument[]) {
   // Are there at least two arguments? If not, print the help.
   if (number_of_arguments < 2) {
     print_usage();
-  } 
+  }
 
   // Otherwise, we can proceed.
   else {
@@ -147,12 +141,12 @@ int main(int number_of_arguments, char *argument[]) {
     for (i = 1; i < number_of_arguments; i++) {
 
       // Is this argument the optional "--cachebust"?
-      if (strcmp(argument[i], "--cachebust") == 0) {
+      if (strncmp(argument[i], "--cachebust", 11) == 0) {
         set_cachebust(1);
       }
 
       // Is this argument the optional "--ignore"? 
-      else if (strcmp(argument[i], "--ignore") == 0) {
+      else if (strncmp(argument[i], "--ignore", 8) == 0) {
 
         // The string of items to blacklist/ignore will be the next argument.
         blacklist_additions = argument[i + 1];
@@ -162,16 +156,20 @@ int main(int number_of_arguments, char *argument[]) {
         // won't try to process the blacklist string.
         i++;
 
-      } 
+      }
 
       // Is this argument the optional "--base64"?
-      else if (strcmp(argument[i], "--base64") == 0) {
+      else if (strncmp(argument[i], "--base64", 8) == 0) {
 
         // The max size of base64 content will be the next argument.
-	set_max_filesize_to_base64_encode(atoi(argument[i + 1]));
 
-	// Increment the counter so the next iteration skips that argument.
-	i++;
+        // TODO - could this argument be larger than an int?
+        // Consider atol here. Consider limiting the number of characters
+        // in the argument before conversion.
+        set_max_filesize_to_base64_encode(atoi(argument[i + 1]));
+
+        // Increment the counter so the next iteration skips that argument.
+        i++;
 
       }
 
@@ -222,14 +220,34 @@ int main(int number_of_arguments, char *argument[]) {
 
       // Initialize the blacklist.
       if (has_blacklist_additions) {
-        blacklist = malloc(strlen(blacklist_additions) + 5);
-        initialize_string(blacklist);
-        add_to_string(blacklist, ".,..,");
-        add_to_string(blacklist, blacklist_additions);
+
+        // TODO - Did you include the null terminators in ".,..," in the malloc argument size?
+        // I'm pretty sure this is wrong. I've tried to fix it but please check my code.
+
+        blacklist = malloc(strlen(blacklist_additions) + 6);
+        if (blacklist != NULL) {
+          initialize_string(blacklist);
+          add_to_string(blacklist, ".,..,");
+          add_to_string(blacklist, blacklist_additions);
+        } else {
+          // malloc failed, bail out
+          puts("malloc failure, wtf");
+          return 1;
+        }
       } else {
-        blacklist = malloc(4);
-        initialize_string(blacklist);
-        add_to_string(blacklist, ".,..");
+
+        // TODO - Did you include the null terminators in ".,..," in the malloc argument size?
+        // I'm pretty sure this is wrong. I've tried to fix it but please check my code.
+
+        blacklist = malloc(5);
+        if (blacklist != NULL) {
+          initialize_string(blacklist);
+          add_to_string(blacklist, ".,..");
+        } else {
+          // malloc failed, bail out
+          puts("malloc failure, wtf");
+          return 1;
+        }
       }
 
       // Start the logging.
@@ -241,6 +259,7 @@ int main(int number_of_arguments, char *argument[]) {
       // Stop the logging.
       stop_logging();
 
+      // TODO - explicitly state if we're letting the system free the memory we're malloc'ing.
     }
 
   }
